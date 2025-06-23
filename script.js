@@ -1,4 +1,4 @@
-// grab all the controls
+// Grab all the controls
 const uploadInput      = document.getElementById('upload');
 const textureSelect    = document.getElementById('textureSelect');
 const blendMode        = document.getElementById('blendMode');
@@ -13,7 +13,7 @@ const ctx    = canvas.getContext('2d');
 let photo   = null;
 let texture = new Image();
 
-// 🖼️ Handle photo upload
+// 📸 Handle photo upload
 uploadInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -33,42 +33,46 @@ textureSelect.addEventListener('change', () => {
   texture.onload = () => draw();
 });
 
-// 🔁 Re-draw on any control change
+// 🔁 Redraw whenever any control changes
 blendMode.addEventListener('change', draw);
 opacitySlider.addEventListener('input', draw);
 brightnessSlider.addEventListener('input', draw);
 contrastSlider.addEventListener('input', draw);
 
-// 🖌️ Main draw function
+// 🖌️ Main draw function: photo + texture, then brightness/contrast grouped
 function draw() {
   if (!photo) return;
 
-  // match canvas size to photo
-  const w = photo.width, h = photo.height;
-  canvas.width = w;
+  const w = photo.width,
+        h = photo.height;
+  canvas.width  = w;
   canvas.height = h;
-
-  // clear and apply brightness/contrast filter to the photo
   ctx.clearRect(0, 0, w, h);
-  ctx.filter = `brightness(${brightnessSlider.value/100}) contrast(${contrastSlider.value/100})`;
+
+  // 1) Apply brightness & contrast to everything
+  ctx.filter = 
+    `brightness(${brightnessSlider.value / 100}) ` +
+    `contrast(${contrastSlider.value / 100})`;
+
+  // 2) Draw the base photo
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
   ctx.drawImage(photo, 0, 0);
 
-  // reset filter so the texture draws normally
-  ctx.filter = 'none';
-
-  // draw the texture with blend & opacity
+  // 3) Draw the texture overlay with blend & opacity
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
     ctx.drawImage(texture, 0, 0, w, h);
-
-    // reset blend settings
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
   }
+
+  // 4) Reset all drawing state
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.filter = 'none';
 }
 
-// 💾 Download the result
+// 💾 Download the merged image
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'blended-image.png';

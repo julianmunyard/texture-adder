@@ -1,12 +1,16 @@
-const uploadInput = document.getElementById('upload');
-const textureSelect = document.getElementById('textureSelect');
-const blendMode = document.getElementById('blendMode');
-const opacitySlider = document.getElementById('opacitySlider');
-const downloadBtn = document.getElementById('download');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+// grab all the controls
+const uploadInput      = document.getElementById('upload');
+const textureSelect    = document.getElementById('textureSelect');
+const blendMode        = document.getElementById('blendMode');
+const opacitySlider    = document.getElementById('opacitySlider');
+const brightnessSlider = document.getElementById('brightnessSlider');
+const contrastSlider   = document.getElementById('contrastSlider');
+const downloadBtn      = document.getElementById('download');
 
-let photo = null;
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+
+let photo   = null;
 let texture = new Image();
 
 // 🖼️ Handle photo upload
@@ -29,32 +33,36 @@ textureSelect.addEventListener('change', () => {
   texture.onload = () => draw();
 });
 
-// 🎛️ Handle blend mode change
+// 🔁 Re-draw on any control change
 blendMode.addEventListener('change', draw);
-
-// 🎚️ Handle opacity change
 opacitySlider.addEventListener('input', draw);
+brightnessSlider.addEventListener('input', draw);
+contrastSlider.addEventListener('input', draw);
 
 // 🖌️ Main draw function
 function draw() {
   if (!photo) return;
 
-  const originalWidth = photo.width;
-  const originalHeight = photo.height;
-  canvas.width = originalWidth;
-  canvas.height = originalHeight;
+  // match canvas size to photo
+  const w = photo.width, h = photo.height;
+  canvas.width = w;
+  canvas.height = h;
 
-  // Draw base photo
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // clear and apply brightness/contrast filter to the photo
+  ctx.clearRect(0, 0, w, h);
+  ctx.filter = `brightness(${brightnessSlider.value/100}) contrast(${contrastSlider.value/100})`;
   ctx.drawImage(photo, 0, 0);
 
-  // Draw texture overlay
+  // reset filter so the texture draws normally
+  ctx.filter = 'none';
+
+  // draw the texture with blend & opacity
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(texture, 0, 0, w, h);
 
-    // Reset blending
+    // reset blend settings
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }

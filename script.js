@@ -1,89 +1,83 @@
-body {
-  background: #111;
-  color: #fff;
-  font-family: monospace;
-  text-align: center;
-  padding: 2em;
+const uploadInput = document.getElementById('upload');
+const textureSelect = document.getElementById('textureSelect');
+const blendMode = document.getElementById('blendMode');
+const opacitySlider = document.getElementById('opacitySlider');
+const brightnessSlider = document.getElementById('brightnessSlider');
+const contrastSlider = document.getElementById('contrastSlider');
+const saturationSlider = document.getElementById('saturationSlider');
+const downloadBtn = document.getElementById('download');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let photo = null;
+let texture = new Image();
+
+// 📷 Handle photo upload
+uploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    photo = new Image();
+    photo.onload = () => draw();
+    photo.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// 🎨 Handle texture selection
+textureSelect.addEventListener('change', () => {
+  texture.src = `textures/${textureSelect.value}`;
+  texture.onload = () => draw();
+});
+
+// 🔁 Update on any setting change
+blendMode.addEventListener('change', draw);
+opacitySlider.addEventListener('input', draw);
+brightnessSlider.addEventListener('input', draw);
+contrastSlider.addEventListener('input', draw);
+saturationSlider.addEventListener('input', draw);
+
+// 🖌️ Draw everything
+function draw() {
+  if (!photo) return;
+
+  const width = photo.width;
+  const height = photo.height;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Set filters
+  ctx.clearRect(0, 0, width, height);
+  ctx.filter = `
+    brightness(${brightnessSlider.value / 100})
+    contrast(${contrastSlider.value / 100})
+    saturate(${saturationSlider.value / 100})
+  `;
+
+  // Draw base photo
+  ctx.drawImage(photo, 0, 0, width, height);
+
+  // Draw texture
+  if (texture.src) {
+    ctx.globalAlpha = opacitySlider.value / 100;
+    ctx.globalCompositeOperation = blendMode.value;
+    ctx.drawImage(texture, 0, 0, width, height);
+
+    // Reset blend mode
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  ctx.filter = 'none';
 }
 
-#previewWrapper {
-  width: 1200px;
-  height: 800px;
-  overflow: hidden;
-  border: 1px solid #555;
-  margin: 2em auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#canvas {
-  max-width: 100%;
-  max-height: 100%;
-  background: #222;
-}
-
-button {
-  margin-top: 1em;
-  padding: 0.6em 1.2em;
-  background: #222;
-  border: 1px solid #555;
-  color: #fff;
-  font-family: monospace;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #444;
-}
-
-/* ↓↓↓ ADDED STYLES FOR CONTROLS ↓↓↓ */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 1em;
-  margin-bottom: 1.5em;
-}
-
-.controls label {
-  margin: 0;
-  font-size: 0.9em;
-  color: #ccc;
-}
-
-.controls select,
-.controls input[type="file"],
-.controls input[type="range"] {
-  margin: 0;
-  vertical-align: middle;
-}
-
-.controls input[type="range"] {
-  width: 150px;
-}
-
-.controls select {
-  height: 2em;
-  padding: 0.2em 0.4em;
-}
-
-/* 🔍 Magnifier styles */
-#magnifier {
-  position: absolute;
-  pointer-events: none;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  width: 150px;
-  height: 150px;
-  overflow: hidden;
-  display: none;
-  z-index: 10;
-}
-
-#magnifier canvas {
-  position: absolute;
-  transform: scale(2); /* Zoom level */
-  transform-origin: top left;
-}
+// 💾 Download result
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'blended-image.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});

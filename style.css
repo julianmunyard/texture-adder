@@ -37,7 +37,6 @@ button:hover {
   background: #444;
 }
 
-/* ↓↓↓ ADDED STYLES FOR CONTROLS ↓↓↓ */
 .controls {
   display: flex;
   flex-wrap: wrap;

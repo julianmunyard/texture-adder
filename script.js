@@ -37,20 +37,10 @@ textureSelect.addEventListener('change', () => {
 function draw() {
   if (!photo) return;
 
-  const boxWidth = 500;
-  const boxHeight = 500;
+  canvas.width = photo.width;
+  canvas.height = photo.height;
 
-  canvas.width = boxWidth;
-  canvas.height = boxHeight;
-
-  ctx.clearRect(0, 0, boxWidth, boxHeight);
-
-  // Calculate scale to fit image into box without distortion
-  const scale = Math.min(boxWidth / photo.width, boxHeight / photo.height);
-  const drawWidth = photo.width * scale;
-  const drawHeight = photo.height * scale;
-  const offsetX = (boxWidth - drawWidth) / 2;
-  const offsetY = (boxHeight - drawHeight) / 2;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   ctx.filter = `
     brightness(${brightnessSlider.value / 100})
@@ -58,19 +48,19 @@ function draw() {
     saturate(${saturationSlider.value / 100})
   `;
 
-  // Draw photo scaled inside fixed box
-  ctx.drawImage(photo, offsetX, offsetY, drawWidth, drawHeight);
+  ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
 
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, offsetX, offsetY, drawWidth, drawHeight);
+    ctx.drawImage(texture, 0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
 
   ctx.filter = 'none';
 }
+
 
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');

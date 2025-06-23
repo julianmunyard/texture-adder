@@ -1,69 +1,160 @@
+@font-face {
+  font-family: 'Cheap Motel';
+  src: url('./fonts/cheap-motel.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1, h2 {
+  font-family: 'Cheap Motel', sans-serif;
+}
+
 body {
-  background: #111;
-  color: #fff;
-  font-family: monospace;
+  font-family: sans-serif;
+  background: #3ca048;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 3px 3px;
+  background-position: 0 0, 1.5px 1.5px;
+  color: #ffe94d;
+  margin: 0;
+  padding: 40px 20px;
   text-align: center;
-  padding: 2em;
+  overflow-x: hidden;
 }
 
-#previewWrapper {
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow: auto;
-  border: 1px solid #555;
-  margin: 1em auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Fixed top section */
+.ui-container {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #3ca048;
+  background-image: 
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 3px 3px;
+  background-position: 0 0, 1.5px 1.5px;
+  padding-top: 20px;
+  padding-bottom: 30px;
+  width: 100%;
+  z-index: 1000;
 }
 
-#canvas {
-  max-width: 600px;  /* 👈 Sets the visual max size */
+h1, h2, label, span, input[type="range"] {
+  color: #ffe94d;
+}
+
+/* Video container starts after UI */
+.canvas-container {
+  position: relative;
+  display: inline-block;
+  background: black;
+  max-width: 90%;
+  margin-top: 250px;
+  z-index: 2000;
+}
+
+canvas {
+  width: 100%;
   height: auto;
-  background: #222;
-}
-
-button {
-  margin-top: 1em;
-  padding: 0.6em 1.2em;
-  background: #222;
-  border: 1px solid #555;
-  color: #fff;
-  font-family: monospace;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #444;
+  display: block;
+  position: relative;
+  z-index: 2000;
 }
 
 .controls {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 1em;
-  margin-bottom: 1.5em;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.controls label {
-  margin: 0;
-  font-size: 0.9em;
-  color: #ccc;
+.canvas-container:hover .controls {
+  opacity: 1;
 }
 
-.controls select,
-.controls input[type="file"],
-.controls input[type="range"] {
-  margin: 0;
-  vertical-align: middle;
+.play-pause {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  color: #c92618;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 1000;
 }
 
-.controls input[type="range"] {
-  width: 150px;
+.canvas-container:hover .play-pause {
+  opacity: 0.9;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
-.controls select {
-  height: 2em;
-  padding: 0.2em 0.4em;
+input[type="range"] {
+  width: 60%;
+  appearance: none;
+  height: 8px;
+  background: #ffe94d;
+  border-radius: 4px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c92618;
+  border: 2px solid #ffe94d;
+  cursor: pointer;
+  margin-top: -5px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #c92618;
+  border: 2px solid #ffe94d;
+  cursor: pointer;
+}
+
+#fpsControl {
+  margin-top: 10px;
+}
+
+video {
+  display: none;
+}
+
+/* ✅ Grain sits above text/UI, below video */
+#grainOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: url('grain.png') repeat;
+  background-size: auto;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 1500;
+  animation: grainMove 2s infinite linear;
+}
+
+@keyframes grainMove {
+  0% { background-position: 0 0; }
+  25% { background-position: 1px 1px; }
+  50% { background-position: 2px 2px; }
+  75% { background-position: 1px -1px; }
+  100% { background-position: 0 0; }
 }

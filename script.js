@@ -1,115 +1,89 @@
-// grab all the controls
-const uploadInput       = document.getElementById('upload');
-const textureSelect     = document.getElementById('textureSelect');
-const blendMode         = document.getElementById('blendMode');
-const opacitySlider     = document.getElementById('opacitySlider');
-const brightnessSlider  = document.getElementById('brightnessSlider');
-const contrastSlider    = document.getElementById('contrastSlider');
-const saturationSlider  = document.getElementById('saturationSlider');
-const downloadBtn       = document.getElementById('download');
-
-const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
-
-let photo   = null;
-let texture = new Image();
-
-// 🖼️ Handle photo upload
-uploadInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    photo = new Image();
-    photo.onload = () => draw();
-    photo.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-// 🎨 Handle texture selection
-textureSelect.addEventListener('change', () => {
-  texture.src = `textures/${textureSelect.value}`;
-  texture.onload = () => draw();
-});
-
-// 🔁 Redraw whenever any control changes
-blendMode.addEventListener('change', draw);
-opacitySlider.addEventListener('input', draw);
-brightnessSlider.addEventListener('input', draw);
-contrastSlider.addEventListener('input', draw);
-saturationSlider.addEventListener('input', draw);
-
-// 🖌️ Main draw function: grouped filters + blend
-function draw() {
-  if (!photo) return;
-
-  const w = photo.width,
-        h = photo.height;
-  canvas.width  = w;
-  canvas.height = h;
-  ctx.clearRect(0, 0, w, h);
-
-  // 1) apply brightness, contrast & saturation to everything
-  ctx.filter =
-    `brightness(${brightnessSlider.value / 100}) ` +
-    `contrast(${contrastSlider.value / 100}) ` +
-    `saturate(${saturationSlider.value / 100})`;
-
-  // 2) draw the base photo
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.drawImage(photo, 0, 0);
-
-  // 3) draw the texture overlay with blend & opacity
-  if (texture.src) {
-    ctx.globalAlpha = opacitySlider.value / 100;
-    ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, 0, 0, w, h);
-  }
-
-  // 4) reset all drawing state
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.filter = 'none';
+body {
+  background: #111;
+  color: #fff;
+  font-family: monospace;
+  text-align: center;
+  padding: 2em;
 }
 
-// 💾 Download the merged image
-downloadBtn.addEventListener('click', () => {
-  const link = document.createElement('a');
-  link.download = 'blended-image.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
+#previewWrapper {
+  width: 1200px;
+  height: 800px;
+  overflow: hidden;
+  border: 1px solid #555;
+  margin: 2em auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-// 🔍 Magnifier setup
-const magnifier = document.getElementById('magnifier');
-const magnifierCanvas = magnifier.querySelector('canvas');
-const magnifierCtx = magnifierCanvas.getContext('2d');
+#canvas {
+  max-width: 100%;
+  max-height: 100%;
+  background: #222;
+}
 
-magnifierCanvas.width = canvas.width;
-magnifierCanvas.height = canvas.height;
+button {
+  margin-top: 1em;
+  padding: 0.6em 1.2em;
+  background: #222;
+  border: 1px solid #555;
+  color: #fff;
+  font-family: monospace;
+  cursor: pointer;
+}
 
-canvas.addEventListener('mousemove', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+button:hover {
+  background: #444;
+}
 
-  // Position the magnifier circle
-  magnifier.style.display = 'block';
-  magnifier.style.left = `${e.pageX - 75}px`;
-  magnifier.style.top = `${e.pageY - 75}px`;
+/* ↓↓↓ ADDED STYLES FOR CONTROLS ↓↓↓ */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 1.5em;
+}
 
-  // Update the magnifier image
-  magnifierCtx.clearRect(0, 0, canvas.width, canvas.height);
-  magnifierCtx.drawImage(canvas, 0, 0);
+.controls label {
+  margin: 0;
+  font-size: 0.9em;
+  color: #ccc;
+}
 
-  // Move the zoomed canvas behind the circular frame
-  magnifierCanvas.style.left = `-${x * 2 - 75}px`;
-  magnifierCanvas.style.top = `-${y * 2 - 75}px`;
-});
+.controls select,
+.controls input[type="file"],
+.controls input[type="range"] {
+  margin: 0;
+  vertical-align: middle;
+}
 
-canvas.addEventListener('mouseleave', () => {
-  magnifier.style.display = 'none';
-});
+.controls input[type="range"] {
+  width: 150px;
+}
+
+.controls select {
+  height: 2em;
+  padding: 0.2em 0.4em;
+}
+
+/* 🔍 Magnifier styles */
+#magnifier {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  display: none;
+  z-index: 10;
+}
+
+#magnifier canvas {
+  position: absolute;
+  transform: scale(2); /* Zoom level */
+  transform-origin: top left;
+}

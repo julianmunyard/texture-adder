@@ -37,13 +37,13 @@ textureSelect.addEventListener('change', () => {
 function draw() {
   if (!photo) return;
 
-  const width = photo.width;
-  const height = photo.height;
+  const previewWidth = 400;
+  const previewHeight = 600;
 
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = previewWidth;
+  canvas.height = previewHeight;
 
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, previewWidth, previewHeight);
 
   ctx.filter = `
     brightness(${brightnessSlider.value / 100})
@@ -51,12 +51,13 @@ function draw() {
     saturate(${saturationSlider.value / 100})
   `;
 
-  ctx.drawImage(photo, 0, 0, width, height);
+  // Fit photo into canvas
+  ctx.drawImage(photo, 0, 0, previewWidth, previewHeight);
 
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, 0, 0, width, height);
+    ctx.drawImage(texture, 0, 0, previewWidth, previewHeight);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }

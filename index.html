@@ -8,39 +8,45 @@
 <body>
   <h1>Texture Adder</h1>
 
-  <input type="file" id="upload" accept="image/*">
-  
-<select id="textureSelect">
-  <option value="magazine.jpg">magazine</option>
-  <option value="vinyl-bleed.jpg">vinyl bleed</option>
-  <option value="60s-mustard.jpg">60s mustard</option>
-  <option value="royal-navy.jpg">royal navy</option>
-  <option value="tonor.png">tonor</option>
-  <option value="heavy-grain.png">heavy grain</option>
-</select>
+  <!-- Controls Wrapper START -->
+  <div class="controls">
+    <input type="file" id="upload" accept="image/*">
+    
+    <select id="textureSelect">
+      <option value="magazine.jpg">magazine</option>
+      <option value="vinyl-bleed.jpg">vinyl bleed</option>
+      <option value="60s-mustard.jpg">60s mustard</option>
+      <option value="royal-navy.jpg">royal navy</option>
+      <option value="tonor.png">tonor</option>
+      <option value="heavy-grain.png">heavy grain</option>
+    </select>
 
-  <select id="blendMode">
-    <option value="overlay">Overlay</option>
-    <option value="multiply">Multiply</option>
-    <option value="screen">Screen</option>
-    <option value="darken">Darken</option>
-    <option value="lighten">Lighten</option>
-    <option value="difference">Difference</option>
-  </select>
+    <select id="blendMode">
+      <option value="overlay">Overlay</option>
+      <option value="multiply">Multiply</option>
+      <option value="screen">Screen</option>
+      <option value="darken">Darken</option>
+      <option value="lighten">Lighten</option>
+      <option value="difference">Difference</option>
+    </select>
 
-<label for="opacitySlider">Blend Intensity</label>
-<input type="range" id="opacitySlider" min="0" max="100" value="100">
+    <label for="opacitySlider">Blend Intensity</label>
+    <input type="range" id="opacitySlider" min="0" max="100" value="100">
 
-<label for="brightnessSlider">brightness</label>
-<input type="range" id="brightnessSlider" min="0" max="200" value="100">
+    <label for="brightnessSlider">Brightness</label>
+    <input type="range" id="brightnessSlider" min="0" max="200" value="100">
 
-<label for="contrastSlider">contrast</label>
-<input type="range" id="contrastSlider" min="0" max="200" value="100">
+    <label for="contrastSlider">Contrast</label>
+    <input type="range" id="contrastSlider" min="0" max="200" value="100">
 
- <div id="previewWrapper">
-  <canvas id="canvas"></canvas>
-</div>
+    <label for="saturationSlider">Saturation</label>
+    <input type="range" id="saturationSlider" min="0" max="200" value="100">
+  </div>
+  <!-- Controls Wrapper END -->
 
+  <div id="previewWrapper">
+    <canvas id="canvas"></canvas>
+  </div>
 
   <button id="download">Download Image</button>
 

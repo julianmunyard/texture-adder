@@ -1,71 +1,70 @@
-const upload = document.getElementById('videoUpload');
-const canvas = document.getElementById('videoCanvas');
+const uploadInput = document.getElementById('upload');
+const textureSelect = document.getElementById('textureSelect');
+const blendMode = document.getElementById('blendMode');
+const opacitySlider = document.getElementById('opacitySlider');
+const brightnessSlider = document.getElementById('brightnessSlider');
+const contrastSlider = document.getElementById('contrastSlider');
+const saturationSlider = document.getElementById('saturationSlider');
+const downloadBtn = document.getElementById('download');
+const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const video = document.getElementById('video');
-const container = document.getElementById('videoContainer');
-const playPauseBtn = document.getElementById('playPause');
-const seekBar = document.getElementById('seekBar');
-const fpsSlider = document.getElementById('fpsSlider');
-const fpsValue = document.getElementById('fpsValue');
 
-let fps = parseInt(fpsSlider.value);
-let animationId;
+let photo = null;
+let texture = new Image();
 
-fpsSlider.addEventListener('input', () => {
-  fps = parseInt(fpsSlider.value);
-  fpsValue.textContent = fps;
-});
-
-upload.addEventListener('change', (e) => {
+uploadInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  const url = URL.createObjectURL(file);
-  video.src = url;
-
-  video.onloadeddata = () => {
-    container.style.display = 'inline-block';
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    video.play();
-    drawToCanvas();
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    photo = new Image();
+    photo.onload = () => draw();
+    photo.src = event.target.result;
   };
+  reader.readAsDataURL(file);
 });
 
-function drawToCanvas() {
-  cancelAnimationFrame(animationId);
-  let lastTime = 0;
+textureSelect.addEventListener('change', () => {
+  texture.src = `textures/${textureSelect.value}`;
+  texture.onload = () => draw();
+});
 
-  function draw(time) {
-    const interval = 1000 / fps;
-    if (time - lastTime >= interval) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      lastTime = time;
-    }
-    animationId = requestAnimationFrame(draw);
+[blendMode, opacitySlider, brightnessSlider, contrastSlider, saturationSlider].forEach(control => {
+  control.addEventListener('input', draw);
+});
+
+function draw() {
+  if (!photo) return;
+
+  canvas.width = photo.width;
+  canvas.height = photo.height;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.filter = `
+    brightness(${brightnessSlider.value / 100})
+    contrast(${contrastSlider.value / 100})
+    saturate(${saturationSlider.value / 100})
+  `;
+
+  ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+
+  if (texture.src) {
+    ctx.globalAlpha = opacitySlider.value / 100;
+    ctx.globalCompositeOperation = blendMode.value;
+    ctx.drawImage(texture, 0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
   }
 
-  animationId = requestAnimationFrame(draw);
+  ctx.filter = 'none';
 }
 
-playPauseBtn.addEventListener('click', () => {
-  if (video.paused) {
-    video.play();
-    playPauseBtn.textContent = '❚❚';
-  } else {
-    video.pause();
-    playPauseBtn.textContent = '►';
-  }
-});
 
-video.addEventListener('timeupdate', () => {
-  seekBar.max = video.duration;
-  seekBar.value = video.currentTime;
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'blended-image.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 });
-
-seekBar.addEventListener('input', () => {
-  video.currentTime = seekBar.value;
-});
-
-video.addEventListener('play', () => playPauseBtn.textContent = '❚❚');
-video.addEventListener('pause', () => playPauseBtn.textContent = '►');

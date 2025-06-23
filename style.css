@@ -7,9 +7,9 @@ body {
 }
 
 #previewWrapper {
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow: auto;
+  width: 400px;
+  height: 600px;
+  overflow: hidden;
   border: 1px solid #555;
   margin: 1em auto;
   display: flex;
@@ -18,9 +18,9 @@ body {
 }
 
 #canvas {
+  width: 100%;
+  height: 100%;
   background: #222;
-  max-width: 100%;
-  height: auto;
 }
 
 button {

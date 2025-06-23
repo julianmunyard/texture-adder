@@ -36,3 +36,35 @@ button {
 button:hover {
   background: #444;
 }
+
+/* ↓↓↓ ADDED STYLES FOR CONTROLS ↓↓↓ */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 1.5em;
+}
+
+.controls label {
+  margin: 0;
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.controls select,
+.controls input[type="file"],
+.controls input[type="range"] {
+  margin: 0;
+  vertical-align: middle;
+}
+
+.controls input[type="range"] {
+  width: 150px;
+}
+
+.controls select {
+  height: 2em;
+  padding: 0.2em 0.4em;
+}

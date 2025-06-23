@@ -8,10 +8,9 @@
 <body>
   <h1>Texture Adder</h1>
 
-  <!-- Controls Wrapper START -->
   <div class="controls">
     <input type="file" id="upload" accept="image/*">
-    
+
     <select id="textureSelect">
       <option value="magazine.jpg">magazine</option>
       <option value="vinyl-bleed.jpg">vinyl bleed</option>
@@ -42,13 +41,10 @@
     <label for="saturationSlider">Saturation</label>
     <input type="range" id="saturationSlider" min="0" max="200" value="100">
   </div>
-  <!-- Controls Wrapper END -->
 
   <div id="previewWrapper">
     <canvas id="canvas"></canvas>
   </div>
-
-  <div id="magnifier"><canvas></canvas></div>
 
   <button id="download">Download Image</button>
 

@@ -37,13 +37,20 @@ textureSelect.addEventListener('change', () => {
 function draw() {
   if (!photo) return;
 
-  const previewWidth = 400;
-  const previewHeight = 600;
+  const boxWidth = 500;
+  const boxHeight = 500;
 
-  canvas.width = previewWidth;
-  canvas.height = previewHeight;
+  canvas.width = boxWidth;
+  canvas.height = boxHeight;
 
-  ctx.clearRect(0, 0, previewWidth, previewHeight);
+  ctx.clearRect(0, 0, boxWidth, boxHeight);
+
+  // Calculate scale to fit image into box without distortion
+  const scale = Math.min(boxWidth / photo.width, boxHeight / photo.height);
+  const drawWidth = photo.width * scale;
+  const drawHeight = photo.height * scale;
+  const offsetX = (boxWidth - drawWidth) / 2;
+  const offsetY = (boxHeight - drawHeight) / 2;
 
   ctx.filter = `
     brightness(${brightnessSlider.value / 100})
@@ -51,13 +58,13 @@ function draw() {
     saturate(${saturationSlider.value / 100})
   `;
 
-  // Fit photo into canvas
-  ctx.drawImage(photo, 0, 0, previewWidth, previewHeight);
+  // Draw photo scaled inside fixed box
+  ctx.drawImage(photo, offsetX, offsetY, drawWidth, drawHeight);
 
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, 0, 0, previewWidth, previewHeight);
+    ctx.drawImage(texture, offsetX, offsetY, drawWidth, drawHeight);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }

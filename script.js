@@ -12,7 +12,6 @@ const ctx = canvas.getContext('2d');
 let photo = null;
 let texture = new Image();
 
-// 📷 Handle photo upload
 uploadInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -26,18 +25,15 @@ uploadInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// 🎨 Handle texture selection
 textureSelect.addEventListener('change', () => {
   texture.src = `textures/${textureSelect.value}`;
   texture.onload = () => draw();
 });
 
-// 🔁 Update on input changes
 [blendMode, opacitySlider, brightnessSlider, contrastSlider, saturationSlider].forEach(control => {
   control.addEventListener('input', draw);
 });
 
-// 🖌️ Main draw function
 function draw() {
   if (!photo) return;
 
@@ -68,7 +64,6 @@ function draw() {
   ctx.filter = 'none';
 }
 
-// 💾 Download
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'blended-image.png';

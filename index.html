@@ -1,54 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Texture Adder</title>
+  <meta charset="UTF-8" />
+  <title>Julian's Video Vulture</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Texture Adder</h1>
 
-  <div class="controls">
-    <input type="file" id="upload" accept="image/*">
+  <!-- Grain overlay -->
+  <div id="grainOverlay"></div>
 
-    <select id="textureSelect">
-      <option value="magazine.jpg">magazine</option>
-      <option value="vinyl-bleed.jpg">vinyl bleed</option>
-      <option value="60s-mustard.jpg">60s mustard</option>
-      <option value="royal-navy.jpg">royal navy</option>
-      <option value="tonor.png">tonor</option>
-      <option value="heavy-grain.png">heavy grain</option>
-    </select>
+  <!-- Fixed UI container -->
+  <div class="ui-container">
+    <h1>Julian’s Video Vulture</h1>
+    <h2>Upload a video, adjust frame rate to taste</h2>
 
-    <select id="blendMode">
-      <option value="overlay">Overlay</option>
-      <option value="multiply">Multiply</option>
-      <option value="screen">Screen</option>
-      <option value="darken">Darken</option>
-      <option value="lighten">Lighten</option>
-      <option value="difference">Difference</option>
-    </select>
+    <input type="file" id="videoUpload" accept="video/*">
 
-    <label for="opacitySlider">Blend Intensity</label>
-    <input type="range" id="opacitySlider" min="0" max="100" value="100">
-
-    <label for="brightnessSlider">Brightness</label>
-    <input type="range" id="brightnessSlider" min="0" max="200" value="100">
-
-    <label for="contrastSlider">Contrast</label>
-    <input type="range" id="contrastSlider" min="0" max="200" value="100">
-
-    <label for="saturationSlider">Saturation</label>
-    <input type="range" id="saturationSlider" min="0" max="200" value="100">
+    <div id="fpsControl">
+      <label for="fpsSlider">Frame Rate:</label>
+      <input type="range" id="fpsSlider" min="1" max="30" value="15">
+      <span id="fpsValue">15</span> FPS
+    </div>
   </div>
 
-  <div id="previewWrapper">
-    <canvas id="canvas"></canvas>
+  <!-- Video container -->
+  <div class="canvas-container" id="videoContainer" style="display:none;">
+    <canvas id="videoCanvas"></canvas>
+    <video id="video" muted loop></video>
+    <div class="play-pause" id="playPause">►</div>
+    <div class="controls">
+      <input type="range" id="seekBar" value="0" step="0.01">
+    </div>
   </div>
 
-  <button id="download">Download Image</button>
+  <script>
+    const upload = document.getElementById('videoUpload');
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
 
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="script.js"></script>
+    const video = document.getElementById('video');
+    const container = document.getElementById('videoContainer');
+    const playPauseBtn = document.getElementById('playPause');
+    const seekBar = document.getElementById('seekBar');
+
+    const fpsSlider = document.getElementById('fpsSlider');
+    const fpsValue = document.getElementById('fpsValue');
+
+    let fps = parseInt(fpsSlider.value);
+    let animationId;
+
+    fpsSlider.addEventListener('input', () => {
+      fps = parseInt(fpsSlider.value);
+      fpsValue.textContent = fps;
+    });
+
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      video.src = url;
+
+      video.onloadeddata = () => {
+        container.style.display = 'inline-block';
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        video.play();
+        drawToCanvas();
+      };
+    });
+
+    function drawToCanvas() {
+      cancelAnimationFrame(animationId);
+      let lastTime = 0;
+
+      function draw(time) {
+        const interval = 1000 / fps;
+        if (time - lastTime >= interval) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          lastTime = time;
+        }
+        animationId = requestAnimationFrame(draw);
+      }
+
+      animationId = requestAnimationFrame(draw);
+    }
+
+    playPauseBtn.addEventListener('click', () => {
+      if (video.paused) {
+        video.play();
+        playPauseBtn.textContent = '❚❚';
+      } else {
+        video.pause();
+        playPauseBtn.textContent = '►';
+      }
+    });
+
+    video.addEventListener('timeupdate', () => {
+      seekBar.max = video.duration;
+      seekBar.value = video.currentTime;
+    });
+
+    seekBar.addEventListener('input', () => {
+      video.currentTime = seekBar.value;
+    });
+
+    video.addEventListener('play', () => playPauseBtn.textContent = '❚❚');
+    video.addEventListener('pause', () => playPauseBtn.textContent = '►');
+  </script>
 </body>
 </html>

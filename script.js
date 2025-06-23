@@ -12,7 +12,7 @@ const ctx = canvas.getContext('2d');
 let photo = null;
 let texture = new Image();
 
-// 📷 Handle photo upload
+// Upload image
 uploadInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -20,53 +20,44 @@ uploadInput.addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = (event) => {
     photo = new Image();
-    photo.onload = () => draw();
+    photo.onload = draw;
     photo.src = event.target.result;
   };
   reader.readAsDataURL(file);
 });
 
-// 🎨 Handle texture selection
+// Texture change
 textureSelect.addEventListener('change', () => {
   texture.src = `textures/${textureSelect.value}`;
-  texture.onload = () => draw();
+  texture.onload = draw;
 });
 
-// 🔁 Update on any setting change
-blendMode.addEventListener('change', draw);
-opacitySlider.addEventListener('input', draw);
-brightnessSlider.addEventListener('input', draw);
-contrastSlider.addEventListener('input', draw);
-saturationSlider.addEventListener('input', draw);
+// Re-draw on control input
+[blendMode, opacitySlider, brightnessSlider, contrastSlider, saturationSlider].forEach(control => {
+  control.addEventListener('input', draw);
+});
 
-// 🖌️ Draw everything
+// Draw everything
 function draw() {
   if (!photo) return;
 
-  const width = photo.width;
-  const height = photo.height;
+  canvas.width = photo.width;
+  canvas.height = photo.height;
 
-  canvas.width = width;
-  canvas.height = height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Set filters
-  ctx.clearRect(0, 0, width, height);
   ctx.filter = `
     brightness(${brightnessSlider.value / 100})
     contrast(${contrastSlider.value / 100})
     saturate(${saturationSlider.value / 100})
   `;
 
-  // Draw base photo
-  ctx.drawImage(photo, 0, 0, width, height);
+  ctx.drawImage(photo, 0, 0);
 
-  // Draw texture
   if (texture.src) {
     ctx.globalAlpha = opacitySlider.value / 100;
     ctx.globalCompositeOperation = blendMode.value;
-    ctx.drawImage(texture, 0, 0, width, height);
-
-    // Reset blend mode
+    ctx.drawImage(texture, 0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   }
@@ -74,7 +65,7 @@ function draw() {
   ctx.filter = 'none';
 }
 
-// 💾 Download result
+// Download image
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.download = 'blended-image.png';
